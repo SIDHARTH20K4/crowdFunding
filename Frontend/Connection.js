@@ -219,3 +219,21 @@ async function createCampaign(amountInEth, description, imgUrl) {
     await tx.wait();
     console.log("Campaign created ✅", tx);
 }
+
+async function donateToCampaign(campaignOwner, amountInEth) {
+    try {
+        const tx = await contract.donateCampaign(campaignOwner, {
+            value: ethers.utils.parseEther(amountInEth),
+        });
+
+        console.log("Transaction sent! Waiting for confirmation...");
+        await tx.wait();
+
+        console.log("Transaction confirmed ✅", tx);
+        return tx;
+
+    } catch (error) {
+        console.error("Transaction failed ❌", error);
+        throw error;
+    }
+}
