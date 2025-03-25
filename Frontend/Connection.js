@@ -1,59 +1,25 @@
-import ethers from "ethers";
-const contractAddress = "";
-let provider, signer;
+import { ethers } from "ethers";
+
+const contractAddress = "0xYOUR_CONTRACT_ADDRESS"; // Replace with your deployed contract address
+let provider, signer, contract;
 
 const ABI = [{
         "anonymous": false,
-        "inputs": [{
-                "indexed": true,
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "ID",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "Amount",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "internalType": "string",
-                "name": "Description",
-                "type": "string"
-            },
-            {
-                "indexed": false,
-                "internalType": "string",
-                "name": "img",
-                "type": "string"
-            }
+        "inputs": [
+            { "indexed": true, "internalType": "address", "name": "owner", "type": "address" },
+            { "indexed": false, "internalType": "uint256", "name": "ID", "type": "uint256" },
+            { "indexed": false, "internalType": "uint256", "name": "Amount", "type": "uint256" },
+            { "indexed": false, "internalType": "string", "name": "Description", "type": "string" },
+            { "indexed": false, "internalType": "string", "name": "img", "type": "string" }
         ],
         "name": "CampaignCreated",
         "type": "event"
     },
     {
-        "inputs": [{
-                "internalType": "uint256",
-                "name": "Amount",
-                "type": "uint256"
-            },
-            {
-                "internalType": "string",
-                "name": "Description",
-                "type": "string"
-            },
-            {
-                "internalType": "string",
-                "name": "img",
-                "type": "string"
-            }
+        "inputs": [
+            { "internalType": "uint256", "name": "Amount", "type": "uint256" },
+            { "internalType": "string", "name": "Description", "type": "string" },
+            { "internalType": "string", "name": "img", "type": "string" }
         ],
         "name": "createCampaign",
         "outputs": [],
@@ -61,153 +27,35 @@ const ABI = [{
         "type": "function"
     },
     {
-        "inputs": [{
-            "internalType": "address payable",
-            "name": "campaignOwner",
-            "type": "address"
-        }],
+        "inputs": [{ "internalType": "address payable", "name": "campaignOwner", "type": "address" }],
         "name": "donateCampaign",
         "outputs": [],
         "stateMutability": "payable",
         "type": "function"
-    },
-    {
-        "anonymous": false,
-        "inputs": [{
-                "indexed": true,
-                "internalType": "address",
-                "name": "donor",
-                "type": "address"
-            },
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "campaignOwner",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "amount",
-                "type": "uint256"
-            }
-        ],
-        "name": "DonationMade",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [{
-                "indexed": true,
-                "internalType": "address",
-                "name": "sender",
-                "type": "address"
-            },
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "contractAddress",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "amount",
-                "type": "uint256"
-            }
-        ],
-        "name": "EtherSentToContract",
-        "type": "event"
-    },
-    {
-        "inputs": [],
-        "name": "fundContract",
-        "outputs": [],
-        "stateMutability": "payable",
-        "type": "function"
-    },
-    {
-        "inputs": [{
-            "internalType": "address",
-            "name": "user",
-            "type": "address"
-        }],
-        "name": "addressBalance",
-        "outputs": [{
-            "internalType": "uint256",
-            "name": "",
-            "type": "uint256"
-        }],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "contractBalance",
-        "outputs": [{
-            "internalType": "uint256",
-            "name": "",
-            "type": "uint256"
-        }],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [{
-            "internalType": "address",
-            "name": "",
-            "type": "address"
-        }],
-        "name": "crowdFundData",
-        "outputs": [{
-                "internalType": "uint256",
-                "name": "Amount",
-                "type": "uint256"
-            },
-            {
-                "internalType": "string",
-                "name": "Description",
-                "type": "string"
-            },
-            {
-                "internalType": "string",
-                "name": "img",
-                "type": "string"
-            },
-            {
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "ID",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
     }
 ];
 
-const contract = new ethers.contract(contractAddress, ABI, signer);
-
-
-async function getProvidersandSigners() {
+/**
+ * Initializes provider, signer, and contract instance.
+ */
+async function initializeProviderAndSigner() {
     if (!window.ethereum) {
-        throw new Error("Metamask not installed");
+        throw new Error("MetaMask not installed");
     }
 
-    //requesting metamask to connect to the wallet
     await window.ethereum.request({ method: "eth_requestAccounts" });
 
-    const provider = ethers.provider.Web3Provider(window.ethereum);
-
-    const signer = provider.getSigner();
-
-    return { provider, signer }
+    provider = new ethers.providers.Web3Provider(window.ethereum);
+    signer = provider.getSigner();
+    contract = new ethers.Contract(contractAddress, ABI, signer);
 }
 
+/**
+ * Creates a new crowdfunding campaign.
+ * @param {string} amountInEth - Amount in ETH
+ * @param {string} description - Campaign description
+ * @param {string} imgUrl - Campaign image URL
+ */
 async function createCampaign(amountInEth, description, imgUrl) {
     if (!signer) await initializeProviderAndSigner(); // Ensure signer is initialized
 
@@ -220,7 +68,14 @@ async function createCampaign(amountInEth, description, imgUrl) {
     console.log("Campaign created ✅", tx);
 }
 
+/**
+ * Donates ETH to a crowdfunding campaign.
+ * @param {string} campaignOwner - Address of the campaign owner
+ * @param {string} amountInEth - Amount in ETH
+ */
 async function donateToCampaign(campaignOwner, amountInEth) {
+    if (!signer) await initializeProviderAndSigner(); // Ensure signer is initialized
+
     try {
         const tx = await contract.donateCampaign(campaignOwner, {
             value: ethers.utils.parseEther(amountInEth),
@@ -231,9 +86,13 @@ async function donateToCampaign(campaignOwner, amountInEth) {
 
         console.log("Transaction confirmed ✅", tx);
         return tx;
-
     } catch (error) {
         console.error("Transaction failed ❌", error);
         throw error;
     }
 }
+
+// Initialize provider and signer at the start
+initializeProviderAndSigner();
+
+export { createCampaign, donateToCampaign };
