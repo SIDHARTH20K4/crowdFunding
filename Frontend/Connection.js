@@ -208,14 +208,14 @@ async function getProvidersandSigners() {
     return { provider, signer }
 }
 
-async function donateCampaign(campaignOwner, amountInEth, image, Description) {
-    const { signer } = await getProvidersandSigners();
-    const tx = await contract.createCampaign(
-        ethers.utils.parseEthers(amountInEth),
-        image,
-        Description
-    );
+async function createCampaign(amountInEth, description, imgUrl) {
+    if (!signer) await initializeProviderAndSigner(); // Ensure signer is initialized
 
+    const tx = await contract.createCampaign(
+        ethers.utils.parseEther(amountInEth),
+        description,
+        imgUrl
+    );
     await tx.wait();
     console.log("Campaign created ✅", tx);
 }
