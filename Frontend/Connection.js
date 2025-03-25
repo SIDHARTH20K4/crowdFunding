@@ -1,5 +1,7 @@
 import ethers from "ethers";
 const contractAddress = "";
+let provider, signer;
+
 const ABI = [{
         "anonymous": false,
         "inputs": [{
@@ -188,6 +190,9 @@ const ABI = [{
     }
 ];
 
+const contract = new ethers.contract(contractAddress, ABI, signer);
+
+
 async function getProvidersandSigners() {
     if (!window.ethereum) {
         throw new Error("Metamask not installed");
@@ -197,4 +202,20 @@ async function getProvidersandSigners() {
     await window.ethereum.request({ method: "eth_requestAccounts" });
 
     const provider = ethers.provider.Web3Provider(window.ethereum);
+
+    const signer = provider.getSigner();
+
+    return { provider, signer }
+}
+
+async function donateCampaign(campaignOwner, amountInEth, image, Description) {
+    const { signer } = await getProvidersandSigners();
+    const tx = await contract.createCampaign(
+        ethers.utils.parseEthers(amountInEth),
+        image,
+        Description
+    );
+
+    await tx.wait();
+    console.log("Campaign created ✅", tx);
 }
