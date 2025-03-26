@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { createCampaign, donateToCampaign } from "./connection"; // ✅ Import connection functions
-import initializeProviderAndSigner from "./connection"; // ✅ Import the wallet initialization function
+import { createCampaign, donateToCampaign } from "../connection"; // ✅ Import connection functions
+import initializeProviderAndSigner from "../connection"; // ✅ Import the wallet initialization function
 
 function App() {
   const [account, setAccount] = useState(null);
