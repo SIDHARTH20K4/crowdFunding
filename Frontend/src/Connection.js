@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 
-const contractAddress = "0xYOUR_CONTRACT_ADDRESS"; // Replace with your deployed contract address
+const contractAddress = "0xYOUR_CONTRACT_ADDRESS";
 let provider, signer, contract;
 
 const ABI = [{
@@ -35,30 +35,24 @@ const ABI = [{
     }
 ];
 
-/**
- * Initializes provider, signer, and contract instance.
- */
-async function initializeProviderAndSigner() {
+
+//Initializes provider, signer, and contract instance.
+
+export async function initializeProviderAndSigner() {
     if (!window.ethereum) {
         throw new Error("MetaMask not installed");
     }
-
     await window.ethereum.request({ method: "eth_requestAccounts" });
 
     provider = new ethers.providers.Web3Provider(window.ethereum);
     signer = provider.getSigner();
     contract = new ethers.Contract(contractAddress, ABI, signer);
+
+    return signer; // ✅ Return signer so App.jsx can use it
 }
 
-/**
- * Creates a new crowdfunding campaign.
- * @param {string} amountInEth - Amount in ETH
- * @param {string} description - Campaign description
- * @param {string} imgUrl - Campaign image URL
- */
-async function createCampaign(amountInEth, description, imgUrl) {
-    if (!signer) await initializeProviderAndSigner(); // Ensure signer is initialized
-
+export async function createCampaign(amountInEth, description, imgUrl) {
+    if (!signer) await initializeProviderAndSigner();
     const tx = await contract.createCampaign(
         ethers.utils.parseEther(amountInEth),
         description,
@@ -68,31 +62,17 @@ async function createCampaign(amountInEth, description, imgUrl) {
     console.log("Campaign created ✅", tx);
 }
 
-/**
- * Donates ETH to a crowdfunding campaign.
- * @param {string} campaignOwner - Address of the campaign owner
- * @param {string} amountInEth - Amount in ETH
- */
-async function donateToCampaign(campaignOwner, amountInEth) {
-    if (!signer) await initializeProviderAndSigner(); // Ensure signer is initialized
-
+export async function donateToCampaign(campaignOwner, amountInEth) {
+    if (!signer) await initializeProviderAndSigner();
     try {
         const tx = await contract.donateCampaign(campaignOwner, {
             value: ethers.utils.parseEther(amountInEth),
         });
-
-        console.log("Transaction sent! Waiting for confirmation...");
         await tx.wait();
-
-        console.log("Transaction confirmed ✅", tx);
+        console.log("Donation successful ✅", tx);
         return tx;
     } catch (error) {
         console.error("Transaction failed ❌", error);
         throw error;
     }
 }
-
-// Initialize provider and signer at the start
-initializeProviderAndSigner();
-
-export { createCampaign, donateToCampaign };
