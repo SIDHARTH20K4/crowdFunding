@@ -1,33 +1,66 @@
 import { useState, useEffect } from "react";
-import { createCampaign, donateToCampaign } from "../connection"; // ✅ Import connection functions
-import initializeProviderAndSigner from "../connection"; // ✅ Import the wallet initialization function
+import { createCampaign, donateToCampaign, initializeProviderAndSigner } from "./Connection";
 
 function App() {
-  const [account, setAccount] = useState(null);
+  const [account, setAccount] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [campaignOwner, setCampaignOwner] = useState("");
+
+  const connectWallet = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const { signer } = await initializeProviderAndSigner();
+      const address = await signer.getAddress();
+      setAccount(address);
+    } catch (err) {
+      console.error("Connection error:", err);
+      setError(err.message.includes("already pending") 
+        ? "Please complete the pending wallet request first" 
+        : "Failed to connect wallet");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function connectWallet() {
-      try {
-        const signer = await initializeProviderAndSigner(); // ✅ Use the function from connection.js
-        const userAddress = await signer.getAddress();
-        setAccount(userAddress);
-      } catch (error) {
-        console.error("Error connecting wallet:", error);
-      }
+    // Check if already connected
+    if (window.ethereum?.isConnected()) {
+      connectWallet();
     }
-    connectWallet();
   }, []);
 
   return (
-    <div>
+    <div style={{ padding: 20 }}>
       <h1>Crowdfunding DApp</h1>
-      {account ? <p>Connected as: {account}</p> : <p>Connecting...</p>}
-      <button onClick={() => createCampaign("0.1", "Help fund our project!", "https://via.placeholder.com/150")}>
-        Create Campaign
-      </button>
-      <button onClick={() => donateToCampaign("0xOWNER_ADDRESS", "0.05")}>
-        Donate
-      </button>
+      
+      {account ? (
+        <p>Connected: {account}</p>
+      ) : (
+        <button onClick={connectWallet} disabled={loading}>
+          {loading ? "Connecting..." : "Connect Wallet"}
+        </button>
+      )}
+
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
+      <div style={{ marginTop: 20 }}>
+        <button onClick={() => createCampaign("0.1", "Test", "https://example.com")}>
+          Create Campaign
+        </button>
+        <input
+          value={campaignOwner}
+          onChange={(e) => setCampaignOwner(e.target.value)}
+          placeholder="Campaign Owner Address"
+        />
+        <button 
+          onClick={() => donateToCampaign(campaignOwner, "0.05")}
+          disabled={!campaignOwner}
+        >
+          Donate
+        </button>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 
-const contractAddress = "0xYOUR_CONTRACT_ADDRESS";
+const contractAddress = "0xYOUR_CONTRACT_ADDRESS"; // Replace with actual contract address
 let provider, signer, contract;
 
 const ABI = [{
@@ -35,44 +35,49 @@ const ABI = [{
     }
 ];
 
-
-//Initializes provider, signer, and contract instance.
-
 export async function initializeProviderAndSigner() {
+    // Check if already initialized
+    if (provider && signer) return { provider, signer, contract };
+
     if (!window.ethereum) {
         throw new Error("MetaMask not installed");
     }
-    await window.ethereum.request({ method: "eth_requestAccounts" });
 
-    provider = new ethers.providers.Web3Provider(window.ethereum);
-    signer = provider.getSigner();
-    contract = new ethers.Contract(contractAddress, ABI, signer);
+    try {
+        // Check for pending requests
+        if (window.ethereum._state && window.ethereum._state.isConnected) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
 
-    return signer; // ✅ Return signer so App.jsx can use it
+        // Request accounts
+        await window.ethereum.request({ method: "eth_requestAccounts" });
+
+        // Modern ethers v6 syntax
+        provider = new ethers.BrowserProvider(window.ethereum);
+        signer = await provider.getSigner();
+        contract = new ethers.Contract(contractAddress, ABI, signer);
+
+        return { provider, signer, contract };
+    } catch (error) {
+        console.error("Initialization error:", error);
+        throw error;
+    }
 }
 
 export async function createCampaign(amountInEth, description, imgUrl) {
-    if (!signer) await initializeProviderAndSigner();
+    const { contract } = await initializeProviderAndSigner();
     const tx = await contract.createCampaign(
-        ethers.utils.parseEther(amountInEth),
+        ethers.parseEther(amountInEth),
         description,
         imgUrl
     );
-    await tx.wait();
-    console.log("Campaign created ✅", tx);
+    return tx.wait();
 }
 
 export async function donateToCampaign(campaignOwner, amountInEth) {
-    if (!signer) await initializeProviderAndSigner();
-    try {
-        const tx = await contract.donateCampaign(campaignOwner, {
-            value: ethers.utils.parseEther(amountInEth),
-        });
-        await tx.wait();
-        console.log("Donation successful ✅", tx);
-        return tx;
-    } catch (error) {
-        console.error("Transaction failed ❌", error);
-        throw error;
-    }
+    const { contract } = await initializeProviderAndSigner();
+    const tx = await contract.donateCampaign(campaignOwner, {
+        value: ethers.parseEther(amountInEth)
+    });
+    return tx.wait();
 }
