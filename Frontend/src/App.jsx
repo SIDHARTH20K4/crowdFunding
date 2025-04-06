@@ -1,8 +1,8 @@
-import { useCrowdfunding } from './Hooks/useCrowdFunding';
-import { ConnectWallet } from '../components/ConnectWallet';
-import { CreateCampaign } from '../components/CreateCampaign';
-import { CampaignCard } from '../components/CampaignCard';
-import './App.css';
+import { useCrowdfunding } from "./Hooks/useCrowdfunding";
+import { ConnectWallet } from "../components/ConnectWallet";
+import { CreateCampaign } from "../components/CreateCampaign";
+import { CampaignCard } from "../components/CampaignCard";
+import './index.css';
 
 function App() {
   const {
@@ -15,35 +15,49 @@ function App() {
   } = useCrowdfunding();
 
   return (
-    <div className="container py-4">
-      <h1 className="text-center mb-4">Simple Crowdfunding</h1>
-      
-      <div className="d-flex justify-content-end mb-4">
+    <div className="App">
+      <header className="header">
+        <div className="logo">
+          <span>🌱</span>
+          <span>FundForward</span>
+        </div>
         <ConnectWallet connectWallet={connectWallet} account={account} />
-      </div>
+      </header>
 
-      {account && (
-        <CreateCampaign createCampaign={createCampaign} loading={loading} />
-      )}
+      <main className="container">
+        {account && (
+          <CreateCampaign 
+            createCampaign={createCampaign} 
+            loading={loading} 
+          />
+        )}
 
-      <h2 className="mb-3">Active Campaigns</h2>
-      {loading ? (
-        <div className="text-center">Loading campaigns...</div>
-      ) : campaigns.length > 0 ? (
-        <div className="row">
-          {campaigns.map((campaign, index) => (
-            <div className="col-md-4 mb-4" key={index}>
-              <CampaignCard 
-                campaign={campaign} 
+        <h2 style={{ margin: '2rem 0 1rem', color: 'var(--primary)' }}>
+          {account ? 'Active Campaigns' : 'Connect Wallet to View Campaigns'}
+        </h2>
+
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '2rem' }}>
+            <div className="spinner"></div>
+            <p>Loading campaigns...</p>
+          </div>
+        ) : campaigns.length > 0 ? (
+          <div className="campaigns-grid">
+            {campaigns.map((campaign, index) => (
+              <CampaignCard
+                key={index}
+                campaign={campaign}
                 donate={donate}
                 account={account}
               />
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="text-center">No campaigns found</div>
-      )}
+            ))}
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '2rem' }}>
+            <p>No campaigns found. Create one to get started!</p>
+          </div>
+        )}
+      </main>
     </div>
   );
 }

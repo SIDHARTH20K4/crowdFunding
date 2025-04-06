@@ -11,39 +11,48 @@ export function CampaignCard({ campaign, donate, account }) {
   };
 
   return (
-    <div className="campaign-card card mb-3">
-      <img src={campaign.img} className="card-img-top" alt="Campaign" />
-      <div className="card-body">
-        <h5 className="card-title">{campaign.description}</h5>
-        <p className="card-text">Goal: {campaign.amount}</p>
-        <p className="card-text">Owner: {campaign.owner}</p>
+    <div className="campaign-card">
+      <img src={campaign.img} className="campaign-image" alt="Campaign" />
+      <div className="campaign-content">
+        <h3 className="campaign-title">{campaign.description}</h3>
+        <p className="campaign-description">Goal: {campaign.amount} ETH</p>
+        
+        <div className="campaign-progress">
+          <div 
+            className="progress-bar" 
+            style={{ width: `${Math.min(100, (campaign.amountRaised / campaign.targetAmount) * 100)}%` }}
+          ></div>
+        </div>
+        
+        <p>Raised: {campaign.amountRaised || 0} ETH</p>
         
         {account && (
           <button 
-            className="btn btn-success"
+            className="btn btn-primary"
             onClick={() => setShowDonateModal(true)}
           >
-            Donate
+            💖 Donate Now
           </button>
         )}
 
         {showDonateModal && (
-          <div className="donate-modal">
+          <div className="modal-overlay">
             <div className="modal-content">
-              <h5>Donate to Campaign</h5>
+              <h3>Support This Campaign</h3>
               <input
                 type="number"
                 placeholder="Amount in ETH"
                 value={donationAmount}
                 onChange={(e) => setDonationAmount(e.target.value)}
-                className="form-control mb-2"
+                className="form-control"
               />
-              <div className="d-flex gap-2">
+              <div className="modal-actions">
                 <button className="btn btn-primary" onClick={handleDonate}>
                   Confirm Donation
                 </button>
                 <button 
-                  className="btn btn-secondary" 
+                  className="btn" 
+                  style={{ background: '#eee' }}
                   onClick={() => setShowDonateModal(false)}
                 >
                   Cancel
