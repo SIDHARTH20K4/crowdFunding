@@ -1,7 +1,11 @@
-// hooks/readable.ts
-import { useReadContract, useReadContracts } from 'wagmi';
-import { useWriteContract, useWaitForTransactionReceipt,UseWriteContractParameters } from 'wagmi';
-import { ABI, CONTRACT_ADDRESS } from '../constants/ABI';
+import { useReadContract, useReadContracts, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { UseWriteContractParameters } from 'wagmi';
+import { ABI, CONTRACT_ADDRESS } from './constants';
+import { useEffect } from 'react';
+import { Address } from 'viem';
+
+// Cast the address to the correct type
+const contractAddress = CONTRACT_ADDRESS as Address;
 
 /**
  * Hook to fetch the total number of campaigns
@@ -9,7 +13,7 @@ import { ABI, CONTRACT_ADDRESS } from '../constants/ABI';
  */
 export function useCampaignCount() {
   return useReadContract({
-    address: CONTRACT_ADDRESS,
+    address: contractAddress,
     abi: ABI,
     functionName: 'getCampaignCount',
   });
@@ -22,7 +26,7 @@ export function useCampaignCount() {
  */
 export function useCampaign(campaignId: bigint) {
   return useReadContract({
-    address: CONTRACT_ADDRESS,
+    address: contractAddress,
     abi: ABI,
     functionName: 'campaigns',
     args: [campaignId],
@@ -35,9 +39,9 @@ export function useCampaign(campaignId: bigint) {
  * @param donorAddress - Address of the donor
  * @returns Object containing donation amount and query status
  */
-export function useDonation(campaignId: bigint, donorAddress: `0x${string}`) {
+export function useDonation(campaignId: bigint, donorAddress: Address) {
   return useReadContract({
-    address: CONTRACT_ADDRESS,
+    address: contractAddress,
     abi: ABI,
     functionName: 'donations',
     args: [campaignId, donorAddress],
@@ -51,7 +55,7 @@ export function useDonation(campaignId: bigint, donorAddress: `0x${string}`) {
  */
 export function useMultipleCampaigns(campaignIds: bigint[]) {
   const contracts = campaignIds.map((id) => ({
-    address: CONTRACT_ADDRESS as `0x${string}`,
+    address: contractAddress,
     abi: ABI,
     functionName: 'campaigns' as const,
     args: [id] as const,
@@ -65,62 +69,30 @@ export function useMultipleCampaigns(campaignIds: bigint[]) {
  * @returns Object containing all campaigns and query status
  */
 export function useAllCampaigns() {
-  const { data: count, isLoading: countLoading } = useCampaignCount();
+  const { data: count, isLoading: countLoading, refetch: refetchCount } = useCampaignCount();
   
   const campaignIds = count ? 
     Array.from({ length: Number(count) }, (_, i) => BigInt(i)) : 
     [];
   
-  return useMultipleCampaigns(campaignIds);
-}
-
-
-/**
- * Hook to create a new campaign
- * @param config - Optional configuration for the transaction
- * @returns Object containing write function and transaction status
- */
-export function useCreateCampaign(config?: UseWriteContractParameters) {
-  const { 
-    writeContract, 
-    data: hash, 
-    error, 
-    isPending 
-  } = useWriteContract(config);
-  
-  const { isLoading: isConfirming, isSuccess: isConfirmed } = 
-    useWaitForTransactionReceipt({ hash });
-  
-  const createCampaign = (
-    targetAmount: bigint, 
-    description: string, 
-    img: string, 
-    durationInDays: bigint
-  ) => {
-    writeContract({
-      address: CONTRACT_ADDRESS,
-      abi: ABI,
-      functionName: 'createCampaign',
-      args: [targetAmount, description, img, durationInDays],
-    });
-  };
+  const { data: campaigns, isLoading, refetch } = useMultipleCampaigns(campaignIds);
   
   return { 
-    createCampaign, 
-    hash, 
-    error, 
-    isPending, 
-    isConfirming, 
-    isConfirmed 
+    data: campaigns, 
+    isLoading: countLoading || isLoading, 
+    refetch: async () => {
+      await refetchCount();
+      await refetch();
+    }
   };
 }
 
 /**
- * Hook to donate to a campaign
- * @param config - Optional configuration for the transaction
+ * Hook to donate to a campaign with success callback
+ * @param config - Optional configuration including success callback
  * @returns Object containing write function and transaction status
  */
-export function useDonate(config?: UseWriteContractParameters) {
+export function useDonate(config?: UseWriteContractParameters & { onSuccess?: () => void }) {
   const { 
     writeContract, 
     data: hash, 
@@ -130,10 +102,17 @@ export function useDonate(config?: UseWriteContractParameters) {
   
   const { isLoading: isConfirming, isSuccess: isConfirmed } = 
     useWaitForTransactionReceipt({ hash });
+  
+  // Handle success callback using useEffect
+  useEffect(() => {
+    if (isConfirmed && config?.onSuccess) {
+      config.onSuccess();
+    }
+  }, [isConfirmed, config?.onSuccess]);
   
   const donate = (campaignId: bigint, value: bigint) => {
     writeContract({
-      address: CONTRACT_ADDRESS,
+      address: contractAddress,
       abi: ABI,
       functionName: 'donate',
       args: [campaignId],
@@ -153,10 +132,10 @@ export function useDonate(config?: UseWriteContractParameters) {
 
 /**
  * Hook to withdraw funds from a campaign (owner only)
- * @param config - Optional configuration for the transaction
+ * @param config - Optional configuration including success callback
  * @returns Object containing write function and transaction status
  */
-export function useWithdrawFunds(config?: UseWriteContractParameters) {
+export function useWithdrawFunds(config?: UseWriteContractParameters & { onSuccess?: () => void }) {
   const { 
     writeContract, 
     data: hash, 
@@ -167,9 +146,15 @@ export function useWithdrawFunds(config?: UseWriteContractParameters) {
   const { isLoading: isConfirming, isSuccess: isConfirmed } = 
     useWaitForTransactionReceipt({ hash });
   
+  useEffect(() => {
+    if (isConfirmed && config?.onSuccess) {
+      config.onSuccess();
+    }
+  }, [isConfirmed, config?.onSuccess]);
+  
   const withdrawFunds = (campaignId: bigint) => {
     writeContract({
-      address: CONTRACT_ADDRESS,
+      address: contractAddress,
       abi: ABI,
       functionName: 'withdrawFunds',
       args: [campaignId],
@@ -188,10 +173,10 @@ export function useWithdrawFunds(config?: UseWriteContractParameters) {
 
 /**
  * Hook to get a refund from a campaign
- * @param config - Optional configuration for the transaction
+ * @param config - Optional configuration including success callback
  * @returns Object containing write function and transaction status
  */
-export function useGetRefund(config?: UseWriteContractParameters) {
+export function useGetRefund(config?: UseWriteContractParameters & { onSuccess?: () => void }) {
   const { 
     writeContract, 
     data: hash, 
@@ -202,9 +187,15 @@ export function useGetRefund(config?: UseWriteContractParameters) {
   const { isLoading: isConfirming, isSuccess: isConfirmed } = 
     useWaitForTransactionReceipt({ hash });
   
+  useEffect(() => {
+    if (isConfirmed && config?.onSuccess) {
+      config.onSuccess();
+    }
+  }, [isConfirmed, config?.onSuccess]);
+  
   const getRefund = (campaignId: bigint) => {
     writeContract({
-      address: CONTRACT_ADDRESS,
+      address: contractAddress,
       abi: ABI,
       functionName: 'getRefund',
       args: [campaignId],
@@ -213,6 +204,42 @@ export function useGetRefund(config?: UseWriteContractParameters) {
   
   return { 
     getRefund, 
+    hash, 
+    error, 
+    isPending, 
+    isConfirming, 
+    isConfirmed 
+  };
+}
+
+export function useCreateCampaign(config?: UseWriteContractParameters & { onSuccess?: () => void }) {
+  const { 
+    writeContract, 
+    data: hash, 
+    error, 
+    isPending 
+  } = useWriteContract(config);
+  
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = 
+    useWaitForTransactionReceipt({ hash });
+  
+  useEffect(() => {
+    if (isConfirmed && config?.onSuccess) {
+      config.onSuccess();
+    }
+  }, [isConfirmed, config?.onSuccess]);
+  
+  const CreateCampaign = (targetAmount: bigint, description: string, image: string, durationInDays: bigint) => {
+    writeContract({
+      address: contractAddress,
+      abi: ABI,
+      functionName: 'createCampaign',
+      args: [targetAmount, description, image, durationInDays],
+    });
+  };
+  
+  return { 
+    CreateCampaign, 
     hash, 
     error, 
     isPending, 
