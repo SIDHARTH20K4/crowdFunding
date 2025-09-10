@@ -9,13 +9,18 @@ function App() {
   const [activeTab, setActiveTab] = useState<'browse' | 'create'>('browse');
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f8f9fa' }}>
+    <div style={{ minHeight: '100vh', background: '#f8f9fa',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  flex: '0 0 0',
+                  justifyContent: 'space-between'
+     }}>
       {/* Header */}
       <header style={{
         background: 'white',
         padding: '16px 24px',
         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-        marginBottom: '24px'
+        // marginBottom: '24px'
       }}>
         <div style={{
           maxWidth: '1200px',
@@ -83,7 +88,7 @@ function App() {
             padding: '60px 20px',
             background: 'white',
             borderRadius: '12px',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
           }}>
             <h2 style={{ color: '#666', marginBottom: '16px' }}>
               Welcome to CrowdFund DApp
@@ -98,7 +103,7 @@ function App() {
 
       {/* Footer */}
       <footer style={{
-        marginTop: '60px',
+        // marginTop: '60px',
         padding: '24px',
         background: '#333',
         color: 'white',
