@@ -104,12 +104,23 @@ const CreateCampaign: React.FC<CreateCampaignProps> = ({ onSuccess, onClose }) =
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md"
     style={{
-      flex: '1 0 0'
+      flex: '1 0 0',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-between',
     }}  
     >
       <h2 className="text-xl font-semibold mb-4">Create New Campaign</h2>
       
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4"
+      style={{
+        flex: '1 0 0',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
+        gap: '25px',
+      }}
+      >
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Target Amount (ETH)
