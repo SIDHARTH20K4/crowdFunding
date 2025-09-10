@@ -102,7 +102,11 @@ const CreateCampaign: React.FC<CreateCampaignProps> = ({ onSuccess, onClose }) =
   }
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
+    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md"
+    style={{
+      flex: '1 0 0'
+    }}  
+    >
       <h2 className="text-xl font-semibold mb-4">Create New Campaign</h2>
       
       <form onSubmit={handleSubmit} className="space-y-4">

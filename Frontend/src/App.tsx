@@ -12,7 +12,7 @@ function App() {
     <div style={{ minHeight: '100vh', background: '#f8f9fa',
                   display: 'flex',
                   flexDirection: 'column',
-                  flex: '0 0 0',
+                  gap: '15px',
                   justifyContent: 'space-between'
      }}>
       {/* Header */}
@@ -36,44 +36,53 @@ function App() {
       </header>
 
       {/* Main Content */}
-      <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
+      <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px',
+                      display: 'flex',
+                      flex: '1 0 0',
+                      flexDirection: 'column',
+                      justifyContent: 'flex-start'
+       }}>
         {isConnected ? (
           <>
             {/* Navigation Tabs */}
             <div style={{
               display: 'flex',
               marginBottom: '24px',
-              borderBottom: '1px solid #e0e0e0'
+              borderBottom: '1px solid #e0e0e0',
+              flexDirection: 'column',
+              flex: '1 0 0',
+              justifyContent: 'flex-start'
             }}>
-              <button
-                onClick={() => setActiveTab('browse')}
-                style={{
-                  padding: '12px 24px',
-                  background: activeTab === 'browse' ? '#4caf50' : 'transparent',
-                  color: activeTab === 'browse' ? 'white' : '#666',
-                  border: 'none',
-                  borderBottom: activeTab === 'browse' ? '2px solid #4caf50' : 'none',
-                  cursor: 'pointer',
-                  fontWeight: '600'
-                }}
-              >
-                Browse Campaigns
-              </button>
-              <button
-                onClick={() => setActiveTab('create')}
-                style={{
-                  padding: '12px 24px',
-                  background: activeTab === 'create' ? '#4caf50' : 'transparent',
-                  color: activeTab === 'create' ? 'white' : '#666',
-                  border: 'none',
-                  borderBottom: activeTab === 'create' ? '2px solid #4caf50' : 'none',
-                  cursor: 'pointer',
-                  fontWeight: '600'
-                }}
-              >
-                Create Campaign
-              </button>
-            </div>
+              <div>
+                <button
+                  onClick={() => setActiveTab('browse')}
+                  style={{
+                    padding: '12px 24px',
+                    background: activeTab === 'browse' ? '#4caf50' : 'transparent',
+                    color: activeTab === 'browse' ? 'white' : '#666',
+                    border: 'none',
+                    borderBottom: activeTab === 'browse' ? '2px solid #4caf50' : 'none',
+                    cursor: 'pointer',
+                    fontWeight: '600'
+                  }}
+                >
+                  Browse Campaigns
+                </button>
+                <button
+                  onClick={() => setActiveTab('create')}
+                  style={{
+                    padding: '12px 24px',
+                    background: activeTab === 'create' ? '#4caf50' : 'transparent',
+                    color: activeTab === 'create' ? 'white' : '#666',
+                    border: 'none',
+                    borderBottom: activeTab === 'create' ? '2px solid #4caf50' : 'none',
+                    cursor: 'pointer',
+                    fontWeight: '600'
+                  }}
+                >
+                  Create Campaign
+                </button>
+              </div>
 
             {/* Tab Content */}
             {activeTab === 'browse' ? (
@@ -81,6 +90,7 @@ function App() {
             ) : (
               <CreateCampaign />
             )}
+            </div>
           </>
         ) : (
           <div style={{
