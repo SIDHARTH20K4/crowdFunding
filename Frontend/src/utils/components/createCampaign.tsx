@@ -83,7 +83,6 @@ const CreateCampaign: React.FC<CreateCampaignProps> = ({ onSuccess, onClose }) =
       [name]: value
     }));
     
-    // Clear error when user starts typing
     if (errors[name as keyof FormErrors]) {
       setErrors(prev => ({
         ...prev,
@@ -94,35 +93,50 @@ const CreateCampaign: React.FC<CreateCampaignProps> = ({ onSuccess, onClose }) =
 
   if (!isConnected) {
     return (
-      <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-4">Create Campaign</h2>
-        <p className="text-gray-600 mb-4">Please connect your wallet to create a campaign.</p>
+      <div style={{
+        maxWidth: '500px',
+        margin: '0 auto',
+        padding: '40px',
+        backgroundColor: '#f8f9fa',
+        borderRadius: '12px',
+        border: '1px solid #e0e0e0',
+        textAlign: 'center'
+      }}>
+        <h2 style={{ marginTop: 0, color: '#333' }}>Create Campaign</h2>
+        <p style={{ color: '#666', marginBottom: 0 }}>
+          Please connect your wallet to create a campaign.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md"
-    style={{
-      flex: '1 0 0',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-    }}  
-    >
-      <h2 className="text-xl font-semibold mb-4">Create New Campaign</h2>
+    <div style={{
+      maxWidth: '500px',
+      margin: '0 auto',
+      padding: '32px',
+      backgroundColor: 'white',
+      borderRadius: '12px',
+      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+    }}>
+      <h2 style={{ 
+        marginTop: 0, 
+        marginBottom: '24px',
+        color: '#333',
+        fontSize: '1.5rem'
+      }}>
+        Create New Campaign
+      </h2>
       
-      <form onSubmit={handleSubmit} className="space-y-4"
-      style={{
-        flex: '1 0 0',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-start',
-        gap: '25px',
-      }}
-      >
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+      <form onSubmit={handleSubmit}>
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{
+            display: 'block',
+            marginBottom: '8px',
+            fontSize: '0.9rem',
+            fontWeight: '600',
+            color: '#333'
+          }}>
             Target Amount (ETH)
           </label>
           <input
@@ -131,18 +145,36 @@ const CreateCampaign: React.FC<CreateCampaignProps> = ({ onSuccess, onClose }) =
             name="targetAmount"
             value={formData.targetAmount}
             onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.targetAmount ? 'border-red-500' : 'border-gray-300'
-            }`}
             placeholder="e.g., 5.0"
+            style={{
+              width: '100%',
+              padding: '12px',
+              border: `1px solid ${errors.targetAmount ? '#f44336' : '#ddd'}`,
+              borderRadius: '8px',
+              fontSize: '1rem',
+              outline: 'none',
+              boxSizing: 'border-box'
+            }}
           />
           {errors.targetAmount && (
-            <p className="mt-1 text-sm text-red-600">{errors.targetAmount}</p>
+            <p style={{ 
+              margin: '6px 0 0 0', 
+              fontSize: '0.85rem', 
+              color: '#f44336' 
+            }}>
+              {errors.targetAmount}
+            </p>
           )}
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{
+            display: 'block',
+            marginBottom: '8px',
+            fontSize: '0.9rem',
+            fontWeight: '600',
+            color: '#333'
+          }}>
             Description
           </label>
           <textarea
@@ -150,18 +182,38 @@ const CreateCampaign: React.FC<CreateCampaignProps> = ({ onSuccess, onClose }) =
             value={formData.description}
             onChange={handleChange}
             rows={3}
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.description ? 'border-red-500' : 'border-gray-300'
-            }`}
             placeholder="What are you raising funds for?"
+            style={{
+              width: '100%',
+              padding: '12px',
+              border: `1px solid ${errors.description ? '#f44336' : '#ddd'}`,
+              borderRadius: '8px',
+              fontSize: '1rem',
+              outline: 'none',
+              resize: 'vertical',
+              fontFamily: 'inherit',
+              boxSizing: 'border-box'
+            }}
           />
           {errors.description && (
-            <p className="mt-1 text-sm text-red-600">{errors.description}</p>
+            <p style={{ 
+              margin: '6px 0 0 0', 
+              fontSize: '0.85rem', 
+              color: '#f44336' 
+            }}>
+              {errors.description}
+            </p>
           )}
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{
+            display: 'block',
+            marginBottom: '8px',
+            fontSize: '0.9rem',
+            fontWeight: '600',
+            color: '#333'
+          }}>
             Image URL (Optional)
           </label>
           <input
@@ -169,13 +221,27 @@ const CreateCampaign: React.FC<CreateCampaignProps> = ({ onSuccess, onClose }) =
             name="image"
             value={formData.image}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="https://example.com/image.jpg"
+            style={{
+              width: '100%',
+              padding: '12px',
+              border: '1px solid #ddd',
+              borderRadius: '8px',
+              fontSize: '1rem',
+              outline: 'none',
+              boxSizing: 'border-box'
+            }}
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+        <div style={{ marginBottom: '24px' }}>
+          <label style={{
+            display: 'block',
+            marginBottom: '8px',
+            fontSize: '0.9rem',
+            fontWeight: '600',
+            color: '#333'
+          }}>
             Duration (Days)
           </label>
           <input
@@ -183,30 +249,69 @@ const CreateCampaign: React.FC<CreateCampaignProps> = ({ onSuccess, onClose }) =
             name="durationInDays"
             value={formData.durationInDays}
             onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.durationInDays ? 'border-red-500' : 'border-gray-300'
-            }`}
             placeholder="e.g., 30"
             min="1"
+            style={{
+              width: '100%',
+              padding: '12px',
+              border: `1px solid ${errors.durationInDays ? '#f44336' : '#ddd'}`,
+              borderRadius: '8px',
+              fontSize: '1rem',
+              outline: 'none',
+              boxSizing: 'border-box'
+            }}
           />
           {errors.durationInDays && (
-            <p className="mt-1 text-sm text-red-600">{errors.durationInDays}</p>
+            <p style={{ 
+              margin: '6px 0 0 0', 
+              fontSize: '0.85rem', 
+              color: '#f44336' 
+            }}>
+              {errors.durationInDays}
+            </p>
           )}
         </div>
 
         {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-sm text-red-600">Error: {error.message}</p>
+          <div style={{
+            padding: '12px',
+            marginBottom: '20px',
+            backgroundColor: '#ffebee',
+            borderRadius: '8px',
+            border: '1px solid #f44336'
+          }}>
+            <p style={{ 
+              margin: 0, 
+              fontSize: '0.9rem', 
+              color: '#c62828' 
+            }}>
+              Error: {error.message}
+            </p>
           </div>
         )}
 
-        <div className="flex justify-end space-x-3 pt-4">
+        <div style={{ 
+          display: 'flex', 
+          gap: '12px', 
+          justifyContent: 'flex-end',
+          paddingTop: '8px'
+        }}>
           {onClose && (
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 transition"
               disabled={isPending || isConfirming}
+              style={{
+                padding: '12px 24px',
+                backgroundColor: 'white',
+                color: '#333',
+                border: '1px solid #ddd',
+                borderRadius: '8px',
+                fontSize: '1rem',
+                fontWeight: '600',
+                cursor: isPending || isConfirming ? 'not-allowed' : 'pointer',
+                opacity: isPending || isConfirming ? 0.6 : 1
+              }}
             >
               Cancel
             </button>
@@ -214,7 +319,17 @@ const CreateCampaign: React.FC<CreateCampaignProps> = ({ onSuccess, onClose }) =
           <button
             type="submit"
             disabled={isPending || isConfirming}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            style={{
+              padding: '12px 24px',
+              backgroundColor: isPending || isConfirming ? '#ccc' : '#4caf50',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '1rem',
+              fontWeight: '600',
+              cursor: isPending || isConfirming ? 'not-allowed' : 'pointer',
+              transition: 'background-color 0.2s'
+            }}
           >
             {isPending || isConfirming ? 'Creating...' : 'Create Campaign'}
           </button>
