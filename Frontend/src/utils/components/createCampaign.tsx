@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { useAccount } from 'wagmi';
-import { useCreateCampaign } from '../Connections/connections';
+import React, { useState } from 'react';
+import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseEther } from 'viem';
+import { CONTRACTS, CROWDFUNDING_ABI } from '../../config/contracts';
 
 interface CreateCampaignProps {
   onSuccess?: () => void;
@@ -21,13 +21,11 @@ interface FormErrors {
   durationInDays?: string;
 }
 
-const CreateCampaign: React.FC<CreateCampaignProps> = ({ onSuccess, onClose }) => {
+export const CreateCampaign: React.FC<CreateCampaignProps> = ({ onSuccess, onClose }) => {
   const { address, isConnected } = useAccount();
-  const { CreateCampaign, isPending, isConfirming, error } = useCreateCampaign({
-    onSuccess: () => {
-      onSuccess?.();
-      onClose?.();
-    }
+  const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
   });
 
   const [formData, setFormData] = useState<FormData>({
@@ -38,6 +36,15 @@ const CreateCampaign: React.FC<CreateCampaignProps> = ({ onSuccess, onClose }) =
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
+
+  // Auto-close on success
+  React.useEffect(() => {
+    if (isSuccess) {
+      alert('Campaign created successfully!');
+      onSuccess?.();
+      onClose?.();
+    }
+  }, [isSuccess]);
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -65,12 +72,19 @@ const CreateCampaign: React.FC<CreateCampaignProps> = ({ onSuccess, onClose }) =
     if (!isConnected) return;
 
     try {
-      CreateCampaign(
-        parseEther(formData.targetAmount),
-        formData.description,
-        formData.image || "https://placehold.co/600x400/4F46E5/white?text=Crowdfunding+Campaign",
-        BigInt(parseInt(formData.durationInDays))
-      );
+      writeContract({
+        address: CONTRACTS.CROWDFUNDING_ADDRESS,
+        abi: CROWDFUNDING_ABI,
+        functionName: 'createCampaign',
+        args: [
+          parseEther(formData.targetAmount),
+          formData.description,
+          formData.image || "https://via.placeholder.com/300?text=Campaign",
+          BigInt(parseInt(formData.durationInDays))
+        ],
+        maxFeePerGas: 30_000_000_000n, // 30 Gwei for Polygon Amoy
+        maxPriorityFeePerGas: 30_000_000_000n,
+      });
     } catch (err) {
       console.error('Error creating campaign:', err);
     }
@@ -137,15 +151,15 @@ const CreateCampaign: React.FC<CreateCampaignProps> = ({ onSuccess, onClose }) =
             fontWeight: '600',
             color: '#333'
           }}>
-            Target Amount (ETH)
+            Target Amount (MATIC)
           </label>
           <input
             type="number"
-            step="0.01"
+            step="0.001"
             name="targetAmount"
             value={formData.targetAmount}
             onChange={handleChange}
-            placeholder="e.g., 5.0"
+            placeholder="e.g., 1.0"
             style={{
               width: '100%',
               padding: '12px',
@@ -331,7 +345,7 @@ const CreateCampaign: React.FC<CreateCampaignProps> = ({ onSuccess, onClose }) =
               transition: 'background-color 0.2s'
             }}
           >
-            {isPending || isConfirming ? 'Creating...' : 'Create Campaign'}
+            {isPending ? 'Awaiting Approval...' : isConfirming ? 'Creating...' : 'Create Campaign'}
           </button>
         </div>
       </form>

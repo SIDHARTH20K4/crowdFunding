@@ -138,3 +138,97 @@ async function generateDonationProof() {
 }
 
 generateDonationProof().catch(console.error);
+
+
+
+import { Identity } from "@semaphore-protocol/identity";
+import { Group } from "@semaphore-protocol/group";
+import { generateProof } from "@semaphore-protocol/proof";
+
+async function generateManualTestProof() {
+    console.log("🔐 Generating ZK Proof for Manual Testing");
+    console.log("═══════════════════════════════════════\n");
+    
+    // CONFIGURATION
+    const CAMPAIGN_ID = 0;
+    const DONATION_AMOUNT = 100000000000000000n; // 0.1 MATIC
+    
+    console.log("📋 Settings:");
+    console.log(`   Campaign ID: ${CAMPAIGN_ID}`);
+    console.log(`   Donation: 0.1 MATIC\n`);
+    
+    // Step 1: Create identity
+    const identity = new Identity();
+    
+    console.log("✅ Step 1: Identity Created");
+    console.log(`   Commitment: ${identity.commitment.toString()}\n`);
+    
+    console.log("⚠️  CRITICAL: Copy this commitment and add it to Semaphore group!");
+    console.log("   In Remix → Semaphore contract → addMember");
+    console.log(`   groupId: 1`);
+    console.log(`   identityCommitment: ${identity.commitment.toString()}\n`);
+    
+    console.log("Press Ctrl+C to stop and add the commitment first.");
+    console.log("Then run this script again.\n");
+    
+    await new Promise(resolve => setTimeout(resolve, 5000));
+    
+    // Step 2: Create group
+    const members = [identity.commitment];
+    const group = new Group(members);
+    
+    console.log("✅ Step 2: Group created locally\n");
+    
+    // Step 3: Generate proof
+    console.log("🔄 Step 3: Generating ZK proof...");
+    console.log("   (Takes 10-15 seconds)\n");
+    
+    const startTime = Date.now();
+    const proof = await generateProof(
+        identity,
+        group,
+        DONATION_AMOUNT,
+        CAMPAIGN_ID
+    );
+    const endTime = Date.now();
+    
+    console.log(`✅ Proof generated in ${(endTime - startTime) / 1000}s!\n`);
+    
+    console.log("═══════════════════════════════════════");
+    console.log("📋 MANUAL TESTING - COPY TO REMIX:");
+    console.log("═══════════════════════════════════════\n");
+    
+    console.log("STEP 1: Add identity to Semaphore group");
+    console.log("----------------------------------------");
+    console.log("Contract: Semaphore");
+    console.log("Function: addMember");
+    console.log(`groupId: 1`);
+    console.log(`identityCommitment: ${identity.commitment.toString()}\n`);
+    
+    console.log("STEP 2: Call donateAnonymously (WITHOUT relayer)");
+    console.log("------------------------------------------------");
+    console.log("Contract: CrowdFunding");
+    console.log("Function: donateAnonymously");
+    console.log(`campaignId: ${CAMPAIGN_ID}`);
+    console.log(`merkleTreeRoot: ${proof.merkleTreeRoot.toString()}`);
+    console.log(`nullifierHash: ${proof.nullifier.toString()}`);
+    console.log(`proof: [${proof.points.join(',')}]`);
+    console.log(`relayer: 0x0000000000000000000000000000000000000000`);
+    console.log(`VALUE: 0.1 MATIC\n`);
+    
+    console.log("STEP 3: Call donateAnonymously (WITH relayer) - NEED RELAYER ADDRESS");
+    console.log("---------------------------------------------------------------------");
+    console.log("Contract: CrowdFunding");
+    console.log("Function: donateAnonymously");
+    console.log(`campaignId: ${CAMPAIGN_ID}`);
+    console.log(`merkleTreeRoot: ${proof.merkleTreeRoot.toString()}`);
+    console.log(`nullifierHash: ${proof.nullifier.toString()}`);
+    console.log(`proof: [${proof.points.join(',')}]`);
+    console.log(`relayer: [YOUR_RELAYER_ADDRESS_HERE]`);
+    console.log(`VALUE: 0.1 MATIC`);
+    console.log(`NOTE: Switch to RELAYER wallet in MetaMask before calling!\n`);
+    
+    console.log("═══════════════════════════════════════\n");
+}
+
+generateManualTestProof().catch(console.error);
